@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Networking and System Design Assessment</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#1d2421;--mute:#5b6660;--line:#d9ddd6;--acc:#1f6f4a;--bad:#b3392b;--good:#1f6f4a;--code:#12201a}
+@media (prefers-color-scheme:dark){:root{--bg:#141a17;--card:#1c2420;--ink:#e8ede9;--mute:#9aa7a0;--line:#2f3a34;--acc:#5fbf8c;--bad:#ef8a7c;--good:#5fbf8c;--code:#0d1511}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,"Times New Roman",serif}
+main{max-width:760px;margin:0 auto;padding:16px 16px 80px}
+h1{font-size:1.7rem;margin:.4em 0 .2em}h2{font-size:1.25rem;margin:1.6em 0 .3em}
+p.sub{color:var(--mute);margin:0 0 1em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
+.q b{display:block;margin-bottom:6px}
+.tag{font:12px system-ui,sans-serif;color:var(--mute);border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-left:6px;white-space:nowrap}
+label.o{display:block;padding:5px 0;cursor:pointer;font-family:system-ui,sans-serif;font-size:.95rem}
+code,pre,textarea.c{font-family:ui-monospace,Consolas,monospace;font-size:.88rem}
+textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;font-size:.95rem}
+textarea.c{min-height:200px;background:var(--code);color:#e8ede9;tab-size:2}
+input[type=text]{padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;max-width:340px;font-size:1rem}
+button{font:600 1rem system-ui,sans-serif;background:var(--acc);color:#fff;border:0;border-radius:6px;padding:10px 20px;cursor:pointer}
+@media (prefers-color-scheme:dark){button{color:#0d1511}}
+button.alt{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#bar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 0;display:flex;justify-content:space-between;font:600 1rem system-ui,sans-serif;z-index:5}
+#bar.low #time{color:var(--bad)}
+.hide{display:none}
+.big{font-size:2.6rem;font-weight:700;line-height:1}
+.row{display:flex;align-items:center;gap:10px;margin:6px 0;font:.9rem system-ui,sans-serif}
+.row span:first-child{width:140px}.meter{flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--acc)}.meter i.w{background:var(--bad)}
+.ok{color:var(--good)}.no{color:var(--bad)}
+pre{background:var(--code);color:#e8ede9;padding:10px;border-radius:6px;overflow-x:auto;white-space:pre-wrap}
+.rev{font:.92rem system-ui,sans-serif;border-left:3px solid var(--line);padding:4px 10px;margin:10px 0}
+.rev.g{border-color:var(--good)}.rev.b{border-color:var(--bad)}
+</style>
+</head>
+<body>
+<main>
+<section id="start">
+  <h1>Networking and System Design Assessment</h1>
+  <p class="sub">Junior DevOps. 45 minutes. 50 marks. Mostly medium questions, with some easy and a few harder ones.</p>
+  <div class="card">
+    <p><b>Before you start</b></p>
+    <p>Part A has 30 multiple-choice questions. Part B has 10 short answers and scenarios: write 1 to 3 sentences in your own words. The timer starts when you click Start, and the test submits itself at 0:00. Do not refresh the page: your answers will be lost.</p>
+    <p><label for="nm">Your name</label><br><input id="nm" type="text" autocomplete="name"></p>
+    <button id="go">Start test</button>
+  </div>
+</section>
+
+<section id="test" class="hide">
+  <div id="bar"><span id="who"></span><span>Time left: <span id="time">45:00</span></span></div>
+  <div id="paper"></div>
+  <button id="sub">Submit test</button>
+</section>
+
+<section id="out" class="hide"></section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+const MCQ=[
+{l:'Easy',t:'Internet basics',q:'The Internet is best described as:',o:['One very large computer','A network of interconnected networks','A single cable under the sea','A program that runs in the browser'],a:1},
+{l:'Easy',t:'Network performance',q:'What does bandwidth measure?',o:['How long data takes to reach the server','How many routers are on the path','The maximum amount of data that can be sent per second','How often packets are lost'],a:2},
+{l:'Easy',t:'Devices',q:'Which device forwards packets between different networks?',o:['Hub','Switch','Router','Wi-Fi antenna'],a:2},
+{l:'Easy',t:'Devices',q:'Which device connects many computers inside one LAN or data center rack and sends traffic only to the right port?',o:['Switch','Router','Hub','Modem'],a:0},
+{l:'Easy',t:'IP addressing',q:'How many bits does an IPv4 address have?',o:['16','32','64','128'],a:1},
+{l:'Easy',t:'DNS',q:'What is the main purpose of DNS?',o:['To encrypt web traffic','To store website files','To translate domain names into IP addresses','To assign MAC addresses'],a:2},
+{l:'Medium',t:'Internet basics',q:'What is the role of an IXP (Internet Exchange Point)?',o:['It is where different ISPs connect and exchange traffic','It stores websites for customers','It gives IP addresses to home users','It encrypts traffic between countries'],a:0},
+{l:'Medium',t:'Internet basics',q:'How does most Internet traffic cross the oceans?',o:['Satellites only','Submarine fiber-optic cables','Wi-Fi towers on ships','Copper phone lines'],a:1},
+{l:'Medium',t:'Network performance',q:'Packets arrive with very uneven delays, so a video call sounds broken. Which measure is poor?',o:['Bandwidth','Jitter','IP version','Subnet size'],a:1},
+{l:'Medium',t:'Network performance',q:'A user has a 1 Gbps connection, but a website hosted on another continent feels slow to start. What is the most likely cause?',o:['Low bandwidth','High latency (distance)','A private IP address','Too many subnets'],a:1},
+{l:'Medium',t:'CDN and data centers',q:'Why does a CDN reduce latency?',o:['It makes the origin server faster','It compresses the Internet cable','It serves cached copies from edge locations close to the user','It replaces DNS'],a:2},
+{l:'Medium',t:'IP addressing',q:'Which of these is a private IP address?',o:['8.8.8.8','52.14.20.9','192.168.1.25','142.250.80.46'],a:2},
+{l:'Medium',t:'IP addressing',q:'Why was IPv6 introduced?',o:['IPv4 is slower than IPv6','IPv4 addresses are running out','IPv6 removes the need for DNS','IPv4 cannot be used in the cloud'],a:1},
+{l:'Medium',t:'Subnets and CIDR',q:'In 10.0.1.0/24, what does /24 tell you?',o:['The first 24 bits are the network prefix','The last 24 bits are the network prefix','There are 24 hosts','The subnet has 24 routers'],a:0},
+{l:'Medium',t:'Subnets and CIDR',q:'How many total addresses are in a /24 network?',o:['24','128','256','65,536'],a:2},
+{l:'Medium',t:'Subnets and CIDR',q:'What does a /32 CIDR block represent?',o:['The whole Internet','A single IP address','256 addresses','A private network'],a:1},
+{l:'Medium',t:'DNS',q:'Which DNS record maps a domain name to an IPv4 address?',o:['MX','CNAME','NS','A'],a:3},
+{l:'Medium',t:'DNS',q:'What does DNS caching do?',o:['Stores earlier answers for a while, so repeat lookups are faster','Hides the domain name','Encrypts the DNS reply','Deletes old domain names'],a:0},
+{l:'Medium',t:'OSI model',q:'Which is the correct order of the OSI layers from layer 1 to layer 7?',o:['Physical, Network, Data Link, Transport, Session, Presentation, Application','Physical, Data Link, Network, Transport, Session, Presentation, Application','Data Link, Physical, Network, Transport, Application, Session, Presentation','Physical, Data Link, Transport, Network, Session, Application, Presentation'],a:1},
+{l:'Medium',t:'OSI model',q:'At which OSI layer do IP addresses and routing work?',o:['Layer 2: Data Link','Layer 3: Network','Layer 4: Transport','Layer 7: Application'],a:1},
+{l:'Medium',t:'TCP and UDP',q:'What is the correct order of the TCP three-way handshake?',o:['ACK, SYN, SYN-ACK','SYN, ACK, SYN-ACK','SYN, SYN-ACK, ACK','SYN-ACK, SYN, ACK'],a:2},
+{l:'Medium',t:'TCP and UDP',q:'Which protocol suits live video streaming or online gaming, where speed matters more than perfect delivery?',o:['TCP','UDP','FTP','SMTP'],a:1},
+{l:'Medium',t:'AWS networking',q:'An EC2 instance in a private subnet must download updates but must not be reachable from the Internet. What do you add?',o:['An Internet Gateway route only','A NAT Gateway','A public IP address','A second VPC'],a:1},
+{l:'Medium',t:'System design',q:'What is the purpose of a JWT in the example application?',o:['To store data in the database','To prove who the user is in each request after login','To speed up the frontend','To send notifications'],a:1},
+{l:'Medium',t:'System design',q:'Which technology gives real-time notifications without the browser asking again and again?',o:['WebSocket','SQL','DNS','chmod'],a:0},
+{l:'Medium',t:'System design',q:'Which data fits a NoSQL database best?',o:['Strict tables with fixed columns and relations','Flexible, document-like data','Only numbers','Only images'],a:1},
+{l:'Harder',t:'AWS networking',q:'SSH to an EC2 instance fails with "Permissions 0644 for key.pem are too open". What fixes it?',o:['chmod 777 key.pem','chmod 400 key.pem','Restart the instance','Change the VPC'],a:1},
+{l:'Harder',t:'System design',q:'In a microservices design, the notification service crashes. What is the most likely result?',o:['The whole application stops','The rest of the application keeps working','The database is deleted','All users are logged out'],a:1},
+{l:'Harder',t:'OSI model',q:'As data goes down the layers from Application to Physical, what happens to it?',o:['Each layer adds its own header (encapsulation)','Each layer deletes the data of the layer above','The data is turned into DNS records','Nothing changes'],a:0},
+{l:'Harder',t:'System design',q:'Why do backend services in the example project use gRPC between themselves?',o:['It is fast and efficient for service-to-service calls','It is the only way to show HTML','It replaces the database','It encrypts passwords'],a:0}
+];
+
+MCQ.forEach(q=>{const c=q.o[q.a];for(let i=q.o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[q.o[i],q.o[j]]=[q.o[j],q.o[i]]}q.a=q.o.indexOf(c)});
+
+const SHORT=[
+{l:'Medium',t:'Internet basics',q:'Explain in order what happens when you open a website, from typing the address to seeing the page.',
+ g:[/dns[\s\S]*(ip|address)|(domain|name)[\s\S]*(ip|address)/i,/(tcp|connect|handshake|request|http)[\s\S]*(response|page|html|server)/i],
+ ideal:'The browser asks DNS for the IP of the domain. It opens a TCP connection to that IP (plus TLS for HTTPS), sends an HTTP request, the server sends back a response, and the browser shows the page.'},
+{l:'Easy',t:'Devices',q:'Explain the difference between a router, a switch and a hub. One sentence each.',
+ g:[/router[\s\S]*(network|route)|(network|route)[\s\S]*router/i,/hub[\s\S]*(broadcast|all)/i],
+ ideal:'A router connects different networks and routes packets between them. A switch connects devices inside a LAN and sends traffic only to the right port. A hub is an old device that broadcasts traffic to all ports.'},
+{l:'Medium',t:'Subnets and CIDR',q:'What does 192.168.10.0/24 mean? How many addresses are in it?',
+ g:[/24[\s\S]*(bit|prefix|network)|(network|prefix)[\s\S]*24/i,/256|254/],
+ ideal:'The first 24 bits are the network prefix and the last 8 bits are for hosts. It has 256 addresses (254 usable).'},
+{l:'Medium',t:'CDN and data centers',q:'Explain why a CDN makes a website faster.',
+ g:[/cache|copy|copies|store/i,/closer|near|edge|distance|latency/i],
+ ideal:'A CDN keeps cached copies of content on edge locations close to users, so data travels a shorter distance and latency is lower.'},
+{l:'Medium',t:'DNS',q:'A website opens by its IP address but not by its domain name. Which service is probably failing, and which command can you use to check it?',
+ g:[/dns/i,/nslookup|\bdig\b|\bhost\s/i],
+ ideal:'DNS is probably failing. Check it with nslookup or dig.'},
+{l:'Medium',t:'TCP and UDP',q:'Choose TCP or UDP for (a) a bank transfer and (b) a live video call. Give a reason for each.',
+ g:[/(bank|transfer|payment|\(?a\))[\s\S]*tcp|tcp[\s\S]*(bank|transfer|payment)/i,/(video|call|live|stream|\(?b\))[\s\S]*udp|udp[\s\S]*(video|call|live|stream)/i],
+ ideal:'(a) TCP, because the data must arrive complete and in order. (b) UDP, because speed matters more and a lost packet is acceptable.'},
+{l:'Medium',t:'Security',q:'What problem does HTTPS solve compared with HTTP, and what is the role of a certificate?',
+ g:[/encrypt|secure|tls|private|sniff|eavesdrop/i,/(certificate|cert)[\s\S]*(identity|verify|trust|prove|authentic|genuine)|(identity|verify|trust|prove|authentic)[\s\S]*(certificate|cert)/i],
+ ideal:'HTTPS encrypts the traffic (using TLS), so others cannot read or change it. A certificate proves the server is really who it says it is.'},
+{l:'Medium',t:'Security',q:'What are ingress and egress traffic?',
+ g:[/ingress[\s\S]*(incoming|inbound|into|enter|coming in)/i,/egress[\s\S]*(outgoing|outbound|out|leav|going out)/i],
+ ideal:'Ingress is incoming traffic into a network or server. Egress is outgoing traffic leaving it.'},
+{l:'Harder',t:'AWS networking',q:'You cannot SSH into an EC2 instance. Name three things you would check.',
+ g:[/security group|port 22|inbound/i,/chmod|400|key|public ip|username|running|route|subnet|internet gateway/i],
+ ideal:'The security group allows inbound port 22 from my IP; the key file has chmod 400 and the right user name; the instance is running and has a public IP in a public subnet with a route to the Internet Gateway.'},
+{l:'Harder',t:'System design',q:'In the project-tracking application, what is the job of the frontend, the backend, the databases (SQL and NoSQL) and the WebSocket notification service? One short line each.',
+ g:[/(frontend|front-end|ui|user interface)[\s\S]*(ui|user|screen|display|html|show)/i,/(websocket|notification)[\s\S]*(real.?time|push|instant|live|alert)/i],
+ ideal:'Frontend: the user interface. Backend: business logic and API calls. SQL: structured data. NoSQL: document-like data. WebSocket service: pushes real-time notifications to users.'}
+];
+
+const SCRIPT=[];
+
+const TIPS={
+'Internet basics':'Revise how the Internet is built: ISPs, IXPs, submarine fiber-optic cables, and the steps from typing a URL to seeing the page (DNS, TCP, HTTP, response).',
+'Network performance':'Practise the difference between bandwidth (how much) and latency (how long). Learn jitter, packet loss and RTT, and run ping to see RTT yourself.',
+'Devices':'Draw router, switch and hub in one small diagram. Remember: router connects networks, switch connects devices in a LAN, hub broadcasts to all.',
+'CDN and data centers':'Learn what a data center, rack, CDN, edge location and Local Zone are, and why content close to the user lowers latency.',
+'IP addressing':'Revise IPv4 (32-bit) and IPv6 (128-bit), why IPv6 exists, and public vs private IPs (10.x, 172.16-31.x, 192.168.x).',
+'Subnets and CIDR':'Practise CIDR: /24 = 256 addresses, /16 = 65,536, /32 = one address. Work out 5 examples by hand.',
+'DNS':'Learn the DNS lookup steps, common records (A, CNAME, NS, MX), caching, and how to test with nslookup or dig.',
+'OSI model':'Learn the 7 layers in order with one job each, and how encapsulation adds a header at each layer. Map them to the TCP/IP model.',
+'TCP and UDP':'Compare TCP (reliable, handshake, retransmission) and UDP (fast, no handshake). Give two real use cases for each.',
+'Security':'Revise HTTP vs HTTPS, TLS, certificates, authentication, and ingress vs egress traffic.',
+'AWS networking':'Practise in AWS: create a VPC with a public and a private subnet, a security group, a NAT Gateway, and SSH into an EC2 instance using chmod 400 on the key.',
+'System design':'Learn the tiers (frontend, backend, AI, database), APIs, gRPC, JWT, WebSocket, SQL vs NoSQL, and monolith vs microservices.'
+};
+
+let end,timer,finished=false,name='';
+
+function qhead(i,x,mark){return `<b>${i}. ${esc(x.q).replace(/\n/g,'<br>')}<span class="tag">${x.l}</span><span class="tag">${mark}</span></b>`}
+
+function build(){
+  let h='<h2>Part A: Multiple choice (30 marks)</h2><p class="sub">Choose one answer. 1 mark each.</p>',n=1;
+  MCQ.forEach((x,i)=>{h+=`<div class="card q">${qhead(n++,x,'1 mark')}`+x.o.map((o,j)=>`<label class="o"><input type="radio" name="m${i}" value="${j}"> ${esc(o)}</label>`).join('')+'</div>'});
+  h+='<h2>Part B: Short answers and scenarios (20 marks)</h2><p class="sub">Answer in one or two sentences. 2 marks each.</p>';
+  SHORT.forEach((x,i)=>{h+=`<div class="card q">${qhead(n++,x,'2 marks')}<textarea id="s${i}" rows="3" aria-label="Answer ${n-1}"></textarea></div>`});
+  if(SCRIPT.length)h+='<h2>Part C: Scripting (14 marks)</h2><p class="sub">Write the full script, starting with the first line.</p>';
+  SCRIPT.forEach((x,i)=>{h+=`<div class="card q"><b>${esc(x.title)}<span class="tag">${x.l}</span></b><p style="margin:0 0 8px;font-family:system-ui,sans-serif;font-size:.95rem">${esc(x.q).replace(/\n/g,'<br>')}</p><textarea class="c" id="c${i}" spellcheck="false" aria-label="${esc(x.title)}"></textarea></div>`});
+  $('#paper').innerHTML=h;
+  document.querySelectorAll('textarea.c').forEach(t=>t.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'  ')}}));
+}
+
+function tick(){
+  const left=Math.max(0,Math.round((end-Date.now())/1000));
+  $('#time').textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+  $('#bar').classList.toggle('low',left<=300);
+  if(left===0)submit();
+}
+
+$('#go').onclick=()=>{
+  name=$('#nm').value.trim()||'Candidate';
+  build();
+  $('#who').textContent=name;
+  $('#start').classList.add('hide');$('#test').classList.remove('hide');
+  end=Date.now()+45*60*1000;timer=setInterval(tick,500);window.scrollTo(0,0);
+};
+$('#sub').onclick=()=>{if(confirm('Submit your test now? You cannot change answers after this.'))submit()};
+
+function submit(){
+  if(finished)return;finished=true;clearInterval(timer);
+  const T={},add=(t,g,m)=>{T[t]=T[t]||[0,0];T[t][0]+=g;T[t][1]+=m};
+  let total=0,sec=[0,0,0],rev='';
+  MCQ.forEach((x,i)=>{
+    const s=document.querySelector(`input[name=m${i}]:checked`),ok=s&&+s.value===x.a;
+    const g=ok?1:0;sec[0]+=g;add(x.t,g,1);
+    rev+=`<div class="rev ${ok?'g':'b'}"><b>${ok?'Correct':'Not correct'}.</b> ${esc(x.q)}<br>${ok?'':'Right answer: <b>'+esc(x.o[x.a])+'</b>'}</div>`;
+  });
+  SHORT.forEach((x,i)=>{
+    const v=$('#s'+i).value,g=x.g.filter(r=>typeof r==='function'?r(v):r.test(v)).length;sec[1]+=g;add(x.t,g,2);
+    rev+=`<div class="rev ${g==2?'g':'b'}"><b>${g}/2.</b> ${esc(x.q)}<br>Your answer: ${esc(v)||'<i>(blank)</i>'}<br>Expected: <b>${esc(x.ideal)}</b></div>`;
+  });
+  SCRIPT.forEach((x,i)=>{
+    const v=$('#c'+i).value,mx=x.c.reduce((a,b)=>a+b[0],0);let g=0,l='';
+    x.c.forEach(([p,d,re])=>{const ok=typeof re==='function'?re(v):re.test(v);if(ok)g+=p;l+=`<li class="${ok?'ok':'no'}">${ok?'✓':'✗'} ${esc(d)} (${p})</li>`});
+    sec[2]+=g;add(x.t,g,mx);
+    rev+=`<div class="rev ${g>=mx*0.7?'g':'b'}"><b>${esc(x.title)}: ${g}/${mx}</b><ul style="margin:4px 0;padding-left:18px;list-style:none">${l}</ul>Sample solution:<pre>${esc(x.sample)}</pre></div>`;
+  });
+  total=sec[0]+sec[1]+sec[2];
+  const lvl=total>=43?['Strong','You have the basics well. You are ready for practical networking tasks with some guidance.']:total>=33?['Good','Your basics are fine. Practise scripting to make it smooth.']:total>=23?['Basic','You know some basics, but several topics need revision. See the plan below.']:['Needs more practice','Go back to the basics and repeat this test in two weeks.'];
+  const rows=Object.entries(T).map(([t,[g,m]])=>{const p=Math.round(g/m*100);return `<div class="row"><span>${esc(t)}</span><div class="meter"><i class="${p<60?'w':''}" style="width:${p}%"></i></div><span style="width:70px;text-align:right">${g}/${m}</span></div>`}).join('');
+  const weak=Object.entries(T).filter(([t,[g,m]])=>g/m<0.6).sort((a,b)=>a[1][0]/a[1][1]-b[1][0]/b[1][1]);
+  const tips=weak.length?'<ul>'+weak.map(([t])=>`<li><b>${esc(t)}:</b> ${esc(TIPS[t])}</li>`).join('')+'</ul>':'<p>No weak topic found. To grow further, build a small VPC in AWS and trace a request through every layer.</p>';
+  const summary=`Networking and System Design Assessment\nName: ${name}\nScore: ${total}/50 (${lvl[0]})\nA: ${sec[0]}/30  B: ${sec[1]}/20\n`+Object.entries(T).map(([t,[g,m]])=>`${t}: ${g}/${m}`).join('\n');
+  $('#out').innerHTML=`<h1>Result for ${esc(name)}</h1><div class="card"><div class="big">${total}<span style="font-size:1.1rem;color:var(--mute)"> / 50</span></div><p><b>${lvl[0]}.</b> ${lvl[1]}</p><p class="sub">Part A: ${sec[0]}/30 · Part B: ${sec[1]}/20</p></div><h2>Score by topic</h2><div class="card">${rows}</div><h2>What to practise next</h2><div class="card">${tips}</div><div class="card"><p>Copy this result and send it to your senior:</p><pre id="sum">${esc(summary)}</pre><button id="cp">Copy result</button></div><h2>Review your answers</h2><p class="sub">Short answers and scripts are checked by key words and patterns, so a correct answer written in a different way may lose a mark. Your senior will review it.</p>${rev}`;
+  $('#test').classList.add('hide');$('#out').classList.remove('hide');window.scrollTo(0,0);
+  $('#cp').onclick=()=>{navigator.clipboard.writeText(summary).then(()=>{$('#cp').textContent='Copied'})};
+}
+</script>
+</body>
+</html>
