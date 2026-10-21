@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shell Scripting Assessment: Full Paper</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#1d2421;--mute:#5b6660;--line:#d9ddd6;--acc:#1f6f4a;--bad:#b3392b;--good:#1f6f4a;--code:#12201a}
+@media (prefers-color-scheme:dark){:root{--bg:#141a17;--card:#1c2420;--ink:#e8ede9;--mute:#9aa7a0;--line:#2f3a34;--acc:#5fbf8c;--bad:#ef8a7c;--good:#5fbf8c;--code:#0d1511}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,"Times New Roman",serif}
+main{max-width:760px;margin:0 auto;padding:16px 16px 80px}
+h1{font-size:1.7rem;margin:.4em 0 .2em}h2{font-size:1.25rem;margin:1.6em 0 .3em}
+p.sub{color:var(--mute);margin:0 0 1em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
+.q b{display:block;margin-bottom:6px}
+.tag{font:12px system-ui,sans-serif;color:var(--mute);border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-left:6px;white-space:nowrap}
+label.o{display:block;padding:5px 0;cursor:pointer;font-family:system-ui,sans-serif;font-size:.95rem}
+code,pre,textarea.c{font-family:ui-monospace,Consolas,monospace;font-size:.88rem}
+textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;font-size:.95rem}
+textarea.c{min-height:200px;background:var(--code);color:#e8ede9;tab-size:2}
+input[type=text]{padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;max-width:340px;font-size:1rem}
+button{font:600 1rem system-ui,sans-serif;background:var(--acc);color:#fff;border:0;border-radius:6px;padding:10px 20px;cursor:pointer}
+@media (prefers-color-scheme:dark){button{color:#0d1511}}
+button.alt{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#bar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 0;display:flex;justify-content:space-between;font:600 1rem system-ui,sans-serif;z-index:5}
+#bar.low #time{color:var(--bad)}
+.hide{display:none}
+.big{font-size:2.6rem;font-weight:700;line-height:1}
+.row{display:flex;align-items:center;gap:10px;margin:6px 0;font:.9rem system-ui,sans-serif}
+.row span:first-child{width:140px}.meter{flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--acc)}.meter i.w{background:var(--bad)}
+.ok{color:var(--good)}.no{color:var(--bad)}
+pre{background:var(--code);color:#e8ede9;padding:10px;border-radius:6px;overflow-x:auto;white-space:pre-wrap}
+.rev{font:.92rem system-ui,sans-serif;border-left:3px solid var(--line);padding:4px 10px;margin:10px 0}
+.rev.g{border-color:var(--good)}.rev.b{border-color:var(--bad)}
+</style>
+</head>
+<body>
+<main>
+<section id="start">
+  <h1>Shell Scripting Assessment</h1>
+  <p class="sub">Entry level. 30 minutes. 40 marks. Questions go from easy to medium, with a few harder ones.</p>
+  <div class="card">
+    <p><b>Before you start</b></p>
+    <p>Part A has 18 multiple-choice questions. Part B has 4 short answers. Part C has 2 short scripts to write. Write the scripts in the boxes, just as you would in a file. You cannot run them here, so read them again before you submit. The timer starts when you click Start, and the test submits itself at 0:00. Do not refresh the page: your answers will be lost.</p>
+    <p><label for="nm">Your name</label><br><input id="nm" type="text" autocomplete="name"></p>
+    <button id="go">Start test</button>
+  </div>
+</section>
+
+<section id="test" class="hide">
+  <div id="bar"><span id="who"></span><span>Time left: <span id="time">30:00</span></span></div>
+  <div id="paper"></div>
+  <button id="sub">Submit test</button>
+</section>
+
+<section id="out" class="hide"></section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+const MCQ=[
+{l:'Easy',t:'Commands',q:'Which command lists all files, including hidden ones, in long format?',o:['ls -l','ls -la','ls -h','ls -x'],a:1},
+{l:'Easy',t:'Script basics',q:'Which is the correct first line of a bash script?',o:['#!/bin/bash','#/bin/bash','!#/bin/bash','//bin/bash'],a:0},
+{l:'Easy',t:'Running scripts',q:'You saved a script as start.sh in the current folder and made it executable. How do you run it?',o:['start.sh','./start.sh','run start.sh','exec: start.sh'],a:1},
+{l:'Easy',t:'Running scripts',q:'What happens if you run ./start.sh before giving it execute permission?',o:['It runs normally','You get a "Permission denied" error','The file is deleted','It runs but prints nothing'],a:1},
+{l:'Easy',t:'Variables',q:'Which variable assignment is correct in bash?',o:['name = "Ali"','$name="Ali"','name="Ali"','set name "Ali"'],a:2},
+{l:'Easy',t:'Redirection and pipes',q:'Which operator adds output to the end of a file without erasing it?',o:['>','>>','<','|'],a:1},
+{l:'Easy',t:'Text processing',q:'What does  grep -i "error" app.log  do?',o:['Searches app.log for "error", ignoring upper and lower case','Counts the lines in app.log','Deletes the lines that contain "error"','Shows only the first error'],a:0},
+{l:'Medium',t:'Script basics',q:'Inside a script, what does $1 mean?',o:['The script name','The first argument','The number of arguments','The exit status'],a:1},
+{l:'Medium',t:'Script basics',q:'What does $? hold?',o:['The process ID','The last argument','The exit status of the last command','The current directory'],a:2},
+{l:'Medium',t:'Permissions',q:'What does permission 755 mean?',o:['Owner rwx, group r-x, others r-x','Owner rw-, group r--, others r--','Owner rwx, group rwx, others rwx','Owner r-x, group rwx, others r-x'],a:0},
+{l:'Medium',t:'Redirection and pipes',q:'What does the pipe | do?',o:['Saves output to a file','Runs two commands in the background','Sends the output of one command as input to the next','Stops a command'],a:2},
+{l:'Medium',t:'Conditions',q:'Which if statement is written correctly in bash?',o:['if [ $a -gt 5 ]; then echo big; fi','if ($a > 5) { echo big }','if [$a -gt 5] then echo big','if $a > 5 then echo big endif'],a:0},
+{l:'Medium',t:'Conditions',q:'What does the test  [ -f "$1" ]  check?',o:['That the first argument is an existing file','That the first argument is a folder','That the first argument is empty','That the first argument is a number'],a:0},
+{l:'Medium',t:'Loops',q:'Which for loop is written correctly in bash?',o:['for i in 1 2 3; do echo $i; done','for (i in 1 2 3) { echo $i }','foreach i in 1 2 3; echo $i','loop i from 1 to 3: echo $i'],a:0},
+{l:'Medium',t:'Loops',q:'What does a while loop do?',o:['Repeats the commands as long as the condition is true','Runs the commands exactly once','Repeats once for every file in a folder','Stops the script'],a:0},
+{l:'Medium',t:'Functions',q:'Which is the correct way to define a function named greet?',o:['greet() { echo "Hello"; }','def greet() { echo "Hello" }','greet = { echo "Hello" }','function greet: echo "Hello"'],a:0},
+{l:'Harder',t:'Functions',q:'You defined:  add() { echo $(( $1 + $2 )); }   How do you call it with the numbers 2 and 3?',o:['add(2,3)','add 2 3','add --2 --3','add = 2 3'],a:1},
+{l:'Harder',t:'Command substitution',q:'What does  today=$(date +%F)  do?',o:['Stores the output of the date command in the variable today','Runs the date command forever','Stores the text $(date +%F) as it is','Creates a file named today'],a:0}
+];
+
+const SHORT=[
+{l:'Easy',t:'Running scripts',q:'Write the first line of a bash script, and the command that makes start.sh executable.',
+ g:[/#!\s*\/(usr\/)?bin\/(env\s+)?bash/i,/chmod\s+(\+x|[ua]\+x|7\d\d)/i],
+ ideal:'#!/bin/bash   and   chmod +x start.sh'},
+{l:'Medium',t:'Conditions',q:'Write an if / else that prints Pass if the variable marks is 50 or more, otherwise prints Fail.',
+ g:[/if\s*\[\[?[^\]\n]*marks[^\]\n]*(-ge\s*50|-gt\s*49)|if\s*\(\(\s*\$?marks\s*>=\s*50/i,/then[\s\S]*else[\s\S]*fi/i],
+ ideal:'if [ "$marks" -ge 50 ]; then echo "Pass"; else echo "Fail"; fi'},
+{l:'Medium',t:'Loops',q:'What is the difference between a for loop and a while loop? One sentence each.',
+ g:[/for[\s\S]*(list|each|item|range|fixed|known|every|number of times)/i,/while[\s\S]*(condition|until|as long|true)/i],
+ ideal:'A for loop goes through a list of items, one by one. A while loop repeats as long as a condition is true.'},
+{l:'Medium',t:'Functions',q:'Define a function named hello that prints Hello, then show how to call it.',
+ g:[/hello\s*\(\)\s*\{|function\s+hello/,v=>(v.match(/\bhello\b/g)||[]).length>=2],
+ ideal:'hello() { echo "Hello"; }   then call it by writing:  hello'}
+];
+
+const SHEBANG=/^#!\s*\/(usr\/)?bin\/(env\s+)?bash/m;
+const SCRIPT=[
+{l:'Easy',t:'Scripting',title:'Task 1: greet.sh (7 marks)',
+ q:'Write a script that asks the user to type their name, using read.\n- If the name is empty, print: Name is required  and exit with code 1.\n- Otherwise, print: Hello, NAME  (for example: Hello, Ali).',
+ c:[
+  [1,'Starts with #!/bin/bash',SHEBANG],
+  [2,'Uses read to get the name',/\bread\b/],
+  [2,'Checks for an empty name (-z) and exits with 1',v=>/-z\s/.test(v)&&/exit\s+1/.test(v)],
+  [2,'Prints "Hello," followed by the name',/echo\s+["']?Hello[\s\S]*\$/i]],
+ sample:'#!/bin/bash\nread -p "Enter your name: " name\nif [ -z "$name" ]; then\n  echo "Name is required"\n  exit 1\nfi\necho "Hello, $name"'},
+{l:'Medium',t:'Scripting',title:'Task 2: list_txt.sh (7 marks)',
+ q:'Write a script that uses a loop to go through every .txt file in the current folder.\n- Print the name of each file.\n- At the end, print: Total files: N',
+ c:[
+  [1,'Starts with #!/bin/bash',SHEBANG],
+  [2,'Uses a for loop over the .txt files',/for\s+\w+\s+in\s+[^\n]*\*\.txt|for\s+\w+\s+in\s+\$\(\s*ls/],
+  [1,'Prints each file name (echo "$f")',/echo\s+["']?\$\{?\w+/],
+  [2,'Counts the files (count=$((count+1)), ((count++)) ...)',/\+\+|\+\s*1|\+=\s*1/],
+  [1,'Prints "Total files: N"',/Total files:/i]],
+ sample:'#!/bin/bash\ncount=0\nfor f in *.txt; do\n  echo "$f"\n  count=$((count + 1))\ndone\necho "Total files: $count"'}
+];
+
+const TIPS={
+'Running scripts':'Practise the full cycle: write start.sh, run chmod +x start.sh, then run ./start.sh. Try bash start.sh too, and see what happens when permission is missing.',
+'Commands':'Practise daily: ls, cd, pwd, cp, mv, find, and the difference between absolute and relative paths. Use a Linux terminal for 15 minutes every day.',
+'Script basics':'Learn the #!/bin/bash line, arguments ($1, $2, $#) and exit codes ($?, exit 0, exit 1). Write 3 tiny scripts that use each one.',
+'Variables':'Practise name="value" (no spaces around =), reading it with $name, and quoting "$name".',
+'Permissions':'Revise chmod with +x and with numbers (755, 644). Make a file, change its permissions, and read the result with ls -l.',
+'Redirection and pipes':'Practise >, >>, 2>, 2>&1 and |. Try: ls | wc -l, and send both output and errors to one file.',
+'Text processing':'Practise grep (-i, -v, -c, -n), wc, sort, head and tail on a real log file.',
+'Conditions':'Write if / else / fi scripts. Learn the tests: -f (file), -d (folder), -z (empty text), -eq and -gt (numbers). Remember the spaces inside [ ].',
+'Loops':'Write one for loop (for i in 1 2 3; do ... done) and one while loop (while [ $i -le 5 ]; do ... done). Loop over files with for f in *.txt.',
+'Functions':'Learn the pattern: name() { commands; } then call it with just the name. Pass values as arguments: add 2 3, and read them as $1 and $2.',
+'Command substitution':'Practise $(command): today=$(date +%F), count=$(ls | wc -l). It saves the output of a command in a variable.',
+'Scripting':'Write small scripts from start to finish: read or take input, check it, use a loop, print a result. Redo the two tasks from this test without looking at the answers.'
+};
+
+let end,timer,finished=false,name='';
+
+function qhead(i,x,mark){return `<b>${i}. ${esc(x.q).replace(/\n/g,'<br>')}<span class="tag">${x.l}</span><span class="tag">${mark}</span></b>`}
+
+function build(){
+  let h='<h2>Part A: Multiple choice (18 marks)</h2><p class="sub">Choose one answer. 1 mark each.</p>',n=1;
+  MCQ.forEach((x,i)=>{h+=`<div class="card q">${qhead(n++,x,'1 mark')}`+x.o.map((o,j)=>`<label class="o"><input type="radio" name="m${i}" value="${j}"> ${esc(o)}</label>`).join('')+'</div>'});
+  h+='<h2>Part B: Short answers (8 marks)</h2><p class="sub">Answer in one or two sentences. 2 marks each.</p>';
+  SHORT.forEach((x,i)=>{h+=`<div class="card q">${qhead(n++,x,'2 marks')}<textarea id="s${i}" rows="3" aria-label="Answer ${n-1}"></textarea></div>`});
+  h+='<h2>Part C: Scripting (14 marks)</h2><p class="sub">Write the full script, starting with the first line.</p>';
+  SCRIPT.forEach((x,i)=>{h+=`<div class="card q"><b>${esc(x.title)}<span class="tag">${x.l}</span></b><p style="margin:0 0 8px;font-family:system-ui,sans-serif;font-size:.95rem">${esc(x.q).replace(/\n/g,'<br>')}</p><textarea class="c" id="c${i}" spellcheck="false" aria-label="${esc(x.title)}"></textarea></div>`});
+  $('#paper').innerHTML=h;
+  document.querySelectorAll('textarea.c').forEach(t=>t.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'  ')}}));
+}
+
+function tick(){
+  const left=Math.max(0,Math.round((end-Date.now())/1000));
+  $('#time').textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+  $('#bar').classList.toggle('low',left<=300);
+  if(left===0)submit();
+}
+
+$('#go').onclick=()=>{
+  name=$('#nm').value.trim()||'Candidate';
+  build();
+  $('#who').textContent=name;
+  $('#start').classList.add('hide');$('#test').classList.remove('hide');
+  end=Date.now()+30*60*1000;timer=setInterval(tick,500);window.scrollTo(0,0);
+};
+$('#sub').onclick=()=>{if(confirm('Submit your test now? You cannot change answers after this.'))submit()};
+
+function submit(){
+  if(finished)return;finished=true;clearInterval(timer);
+  const T={},add=(t,g,m)=>{T[t]=T[t]||[0,0];T[t][0]+=g;T[t][1]+=m};
+  let total=0,sec=[0,0,0],rev='';
+  MCQ.forEach((x,i)=>{
+    const s=document.querySelector(`input[name=m${i}]:checked`),ok=s&&+s.value===x.a;
+    const g=ok?1:0;sec[0]+=g;add(x.t,g,1);
+    rev+=`<div class="rev ${ok?'g':'b'}"><b>${ok?'Correct':'Not correct'}.</b> ${esc(x.q)}<br>${ok?'':'Right answer: <b>'+esc(x.o[x.a])+'</b>'}</div>`;
+  });
+  SHORT.forEach((x,i)=>{
+    const v=$('#s'+i).value,g=x.g.filter(r=>typeof r==='function'?r(v):r.test(v)).length;sec[1]+=g;add(x.t,g,2);
+    rev+=`<div class="rev ${g==2?'g':'b'}"><b>${g}/2.</b> ${esc(x.q)}<br>Your answer: ${esc(v)||'<i>(blank)</i>'}<br>Expected: <b>${esc(x.ideal)}</b></div>`;
+  });
+  SCRIPT.forEach((x,i)=>{
+    const v=$('#c'+i).value,mx=x.c.reduce((a,b)=>a+b[0],0);let g=0,l='';
+    x.c.forEach(([p,d,re])=>{const ok=typeof re==='function'?re(v):re.test(v);if(ok)g+=p;l+=`<li class="${ok?'ok':'no'}">${ok?'✓':'✗'} ${esc(d)} (${p})</li>`});
+    sec[2]+=g;add(x.t,g,mx);
+    rev+=`<div class="rev ${g>=mx*0.7?'g':'b'}"><b>${esc(x.title)}: ${g}/${mx}</b><ul style="margin:4px 0;padding-left:18px;list-style:none">${l}</ul>Sample solution:<pre>${esc(x.sample)}</pre></div>`;
+  });
+  total=sec[0]+sec[1]+sec[2];
+  const lvl=total>=34?['Strong','You have the basics well. You are ready for real tasks with some guidance.']:total>=26?['Good','Your basics are fine. Practise scripting to make it smooth.']:total>=18?['Basic','You know some basics, but several topics need revision. See the plan below.']:['Needs more practice','Go back to the basics and repeat this test in two weeks.'];
+  const rows=Object.entries(T).map(([t,[g,m]])=>{const p=Math.round(g/m*100);return `<div class="row"><span>${esc(t)}</span><div class="meter"><i class="${p<60?'w':''}" style="width:${p}%"></i></div><span style="width:70px;text-align:right">${g}/${m}</span></div>`}).join('');
+  const weak=Object.entries(T).filter(([t,[g,m]])=>g/m<0.6).sort((a,b)=>a[1][0]/a[1][1]-b[1][0]/b[1][1]);
+  const tips=weak.length?'<ul>'+weak.map(([t])=>`<li><b>${esc(t)}:</b> ${esc(TIPS[t])}</li>`).join('')+'</ul>':'<p>No weak topic found. To grow further, learn cron, awk, sed and functions in bash.</p>';
+  const summary=`Shell Scripting Assessment (Full Paper)\nName: ${name}\nScore: ${total}/40 (${lvl[0]})\nA: ${sec[0]}/18  B: ${sec[1]}/8  C: ${sec[2]}/14\n`+Object.entries(T).map(([t,[g,m]])=>`${t}: ${g}/${m}`).join('\n');
+  $('#out').innerHTML=`<h1>Result for ${esc(name)}</h1><div class="card"><div class="big">${total}<span style="font-size:1.1rem;color:var(--mute)"> / 40</span></div><p><b>${lvl[0]}.</b> ${lvl[1]}</p><p class="sub">Part A: ${sec[0]}/18 · Part B: ${sec[1]}/8 · Part C: ${sec[2]}/14</p></div><h2>Score by topic</h2><div class="card">${rows}</div><h2>What to practise next</h2><div class="card">${tips}</div><div class="card"><p>Copy this result and send it to your senior:</p><pre id="sum">${esc(summary)}</pre><button id="cp">Copy result</button></div><h2>Review your answers</h2><p class="sub">Short answers and scripts are checked by key words and patterns, so a correct answer written in a different way may lose a mark. Your senior will review it.</p>${rev}`;
+  $('#test').classList.add('hide');$('#out').classList.remove('hide');window.scrollTo(0,0);
+  $('#cp').onclick=()=>{navigator.clipboard.writeText(summary).then(()=>{$('#cp').textContent='Copied'})};
+}
+</script>
+</body>
+</html>
